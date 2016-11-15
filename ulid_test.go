@@ -1,6 +1,8 @@
 package dilaudid
 
 import (
+	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -13,8 +15,8 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestNewRandom(t *testing.T) {
-	ulid := NewRandom()
+func TestUnique(t *testing.T) {
+	ulid := Unique()
 	et := ulid.String()
 	if len(et) != 26 {
 		t.Fatalf("expected 26 characters, got %q", et)
@@ -35,11 +37,11 @@ func TestDecode(t *testing.T) {
 	expected := int64(1479166679556000000)
 	actual := ulid.time.UnixNano()
 	if actual != expected {
-		t.Fatalf("expected %v, got %v", expected, actual)
+		t.Fatalf("expected %v, got %v", expected, ulid.time)
 	}
 
 	expected2 := [10]byte{241, 126, 23, 52, 36, 98, 153, 248, 225, 116}
-	actual2 := ulid.random
+	actual2 := ulid.nonce
 	if actual != expected {
 		t.Fatalf("expected %v, got %v", expected2, actual2)
 	}
@@ -66,20 +68,60 @@ func TestDecodeBad3(t *testing.T) {
 	}
 }
 
+func TestMarshalJSON(t *testing.T) {
+	expected := []byte("\"01ARYZ6S410000000000000000\"")
+	ulid := New(time.Unix(1469918176, 385000000), [10]byte{})
+	marshalled, err := json.Marshal(&ulid)
+	if err != nil {
+		t.Fatalf("marshal error: %v", err)
+	}
+	if !reflect.DeepEqual(marshalled, expected) {
+		t.Fatalf("expected %v, got %v", expected, marshalled)
+	}
+}
+
+func TestUnmarshalJSON(t *testing.T) {
+	var ulid ULID
+	expected := New(time.Unix(1469918176, 385000000), [10]byte{247, 71, 242, 197, 159, 191, 110, 22, 115, 121})
+	bytes := []byte("\"01ARYZ6S41YX3Z5HCZQXQ1CWVS\"")
+	err := json.Unmarshal(bytes, &ulid)
+	if err != nil {
+		t.Fatalf("unmarshal error: %v", err)
+	}
+	if ulid.time != expected.time {
+		t.Fatalf("expected %v, got %v", expected.time, ulid.time)
+	}
+	if ulid.nonce != expected.nonce {
+		t.Fatalf("expected %v, got %v", expected.nonce, ulid.nonce)
+	}
+}
+
+func TestBytes(t *testing.T) {
+	ulid := New(time.Unix(1469918176, 385000000), [10]byte{247, 71, 242, 197, 159, 191, 110, 22, 115, 121})
+	uuid, err := ulid.UUID()
+	if err != nil {
+		t.Fatalf("UUID error: %v", err)
+	}
+	expected := "00000156-3df3-f747-f2c5-9fbf6e167379"
+	if uuid.String() != expected {
+		t.Fatalf("expected %v, got %v", expected, uuid.String())
+	}
+}
+
 func BenchmarkULID(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewRandom()
+		Unique()
 	}
 }
 
 func BenchmarkEncodedULID(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewRandom().String()
+		Unique().String()
 	}
 }
 
 func BenchmarkSingleEncodedULID(b *testing.B) {
-	u := NewRandom()
+	u := Unique()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = u.String()
