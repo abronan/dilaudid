@@ -31,8 +31,12 @@
     
     import "github.com/hlian/dilaudid"
     u := dilaudid.NewRandom()
-    v, err := dilaudid.Decode("0056190ba946ee68a1c12c3c77b24399")
+    v, err := dilaudid.Decode("01B1JK8PG4Y5Z1ED14CACZHRBM")
     
+    <b>json support?</b>
+
+    we have MarshalJSON and UnMarshalJSON defined
+
     <b>performance</b>
     
     $ go test --bench
