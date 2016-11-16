@@ -35,7 +35,7 @@
 
     <b>json support?</b>
 
-    we have MarshalJSON and UnMarshalJSON defined
+    we have MarshalJSON and UnmarshalJSON defined
 
     <b>binary subspec support?</b>
 
