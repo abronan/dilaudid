@@ -119,7 +119,9 @@ func (ulid ULID) String() string {
 }
 
 // UUID uses ULID information to create a UUID
-func (ulid ULID) UUID() (uuid.UUID, error) {
+//
+// This panics on an invalid UUID. (Which should never happen.)
+func (ulid ULID) UUID() uuid.UUID {
 	var bytes [16]byte
 	msecs := uint64(ulid.time.UnixNano()) / uint64(time.Millisecond)
 	binary.BigEndian.PutUint64(bytes[:8], msecs)
@@ -129,9 +131,9 @@ func (ulid ULID) UUID() (uuid.UUID, error) {
 
 	uuid, err := uuid.FromBytes(bytes[:])
 	if err != nil {
-		return uuid, fmt.Errorf("dilaudid: unable to create UUID: err")
+		panic(fmt.Errorf("dilaudid: unable to create UUID: err"))
 	}
-	return uuid, nil
+	return uuid
 }
 
 // Time returns the timestamp in the ULID
