@@ -97,11 +97,8 @@ func TestUnmarshalJSON(t *testing.T) {
 }
 
 func TestBytes(t *testing.T) {
-	ulid := New(time.Unix(1469918176, 385000000), [10]byte{247, 71, 242, 197, 159, 191, 110, 22, 115, 121})
-	uuid, err := ulid.UUID()
-	if err != nil {
-		t.Fatalf("UUID error: %v", err)
-	}
+	fixture := New(time.Unix(1469918176, 385000000), [10]byte{247, 71, 242, 197, 159, 191, 110, 22, 115, 121})
+	uuid := fixture.UUID()
 	expected := "00000156-3df3-f747-f2c5-9fbf6e167379"
 	if uuid.String() != expected {
 		t.Fatalf("expected %v, got %v", expected, uuid.String())
